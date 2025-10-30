@@ -101,11 +101,11 @@ export class AdminController {
   }
 
   // ---------- Schedule endpoints ----------
-  @Post('schedule')
-  addToSchedule(@Body() dto: ScheduleDto) {
-    // dto: { date: string, foodId: number }
-    return this.adminService.addToSchedule(dto);
-  }
+@Post('schedule')
+addToSchedule(@Body() dto: ScheduleDto) {
+  // dto: { date: string, foodId: number, category: 'FIRST' | 'SECOND' | 'SALAD' }
+  return this.adminService.addToSchedule(dto);
+}
 
   @Get('schedule/:date')
   getScheduleByDate(@Param('date') date: string) {

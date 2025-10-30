@@ -26,14 +26,22 @@ model Food {
   Schedule  Schedule[]
 }
 
+enum FoodCategory {
+  FIRST // 1-taom
+  SECOND // 2-taom
+  SALAD // salat
+}
+
 model Schedule {
-  id     Int      @id @default(autoincrement())
-  date   DateTime // YYYY-MM-DD uchun, vaqt kerak bo‘lsa faqat date qismi ishlatiladi
-  foodId Int
-  food   Food     @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  id       Int          @id @default(autoincrement())
+  date     DateTime
+  foodId   Int
+  category FoodCategory @default(FIRST)
+
+  food Food @relation(fields: [foodId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([date, foodId]) // bir ovqat bir kunga bir marta qo‘shilishi uchun
+  @@unique([date, foodId])
 }

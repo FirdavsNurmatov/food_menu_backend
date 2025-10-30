@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Schedule` ADD COLUMN `category` ENUM('FIRST', 'SECOND', 'SALAD') NOT NULL DEFAULT 'FIRST';

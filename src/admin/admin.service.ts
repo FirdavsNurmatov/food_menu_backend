@@ -9,6 +9,7 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ScheduleDto } from './dto/schedule.dto';
+import { FoodCategory } from './dto/schedule.dto';
 
 @Injectable()
 export class AdminService {
@@ -17,7 +18,6 @@ export class AdminService {
   // CREATE — yangi taom qo‘shish (rasm bilan)
   async create(createAdminDto: CreateAdminDto, file?: Express.Multer.File) {
     try {
-      // Fayl bo‘lsa, fayl nomini DTO'ga yozamiz
       if (file) {
         createAdminDto.image = file.filename;
       }
@@ -56,7 +56,7 @@ export class AdminService {
   async findOne(id: number | string) {
     try {
       const food = await this.prisma.food.findUnique({
-        where: { id: Number(id) }, // ✅ har doim son formatida
+        where: { id: Number(id) },
       });
 
       if (!food) throw new NotFoundException(`ID ${id} bilan taom topilmadi`);
@@ -71,9 +71,8 @@ export class AdminService {
   // UPDATE — taomni o‘zgartirish
   async update(id: number, updateAdminDto: UpdateAdminDto) {
     try {
-      const existingFood = await this.findOne(id); // avval mavjudligini tekshiramiz
+      const existingFood = await this.findOne(id);
 
-      // faqat kelgan maydonlarni update qilamiz
       const dataToUpdate: any = {};
 
       if (updateAdminDto.name !== undefined)
@@ -105,7 +104,6 @@ export class AdminService {
     try {
       const data = await this.findOne(id);
 
-      // Fayl yo‘lini aniqlaymiz
       if (data.image) {
         const imagePath = path.join(
           process.cwd(),
@@ -113,14 +111,11 @@ export class AdminService {
           'foods',
           data.image,
         );
-
-        // Agar fayl mavjud bo‘lsa — o‘chiramiz
         if (fs.existsSync(imagePath)) {
           fs.unlinkSync(imagePath);
         }
       }
 
-      // Endi ma’lumotni bazadan o‘chiramiz
       return await this.prisma.food.delete({ where: { id } });
     } catch (error) {
       console.error('❌ Remove error:', error);
@@ -129,20 +124,31 @@ export class AdminService {
     }
   }
 
+  // 🟢 ADD TO SCHEDULE — jadvalga ovqat qo‘shish
   async addToSchedule(dto: ScheduleDto) {
     try {
+      const { date, foodId, category } = dto;
+
+      if (!category) {
+        throw new InternalServerErrorException('category maydoni kiritilmagan');
+      }
+
       return await this.prisma.schedule.create({
         data: {
-          date: new Date(dto.date),
-          foodId: dto.foodId,
+          date: new Date(date),
+          foodId,
+          category: category as FoodCategory, // 👈 enum sifatida saqlanadi
         },
       });
     } catch (error) {
       console.error("❌ Schedule qo'shishda xatolik:", error);
-      throw new Error("Schedule qo'shishda xatolik yuz berdi");
+      throw new InternalServerErrorException(
+        "Schedule qo'shishda xatolik yuz berdi",
+      );
     }
   }
 
+  // 🟢 GET — sana bo‘yicha jadval
   async getScheduleByDate(date: string) {
     try {
       return await this.prisma.schedule.findMany({
@@ -150,13 +156,17 @@ export class AdminService {
           date: new Date(date),
         },
         include: { food: true },
+        orderBy: { category: 'asc' }, // 👈 1-taom, 2-taom, salat tartibida chiqarish uchun
       });
     } catch (error) {
       console.error('❌ Schedule olishda xatolik:', error);
-      throw new Error('Schedule olishda xatolik yuz berdi');
+      throw new InternalServerErrorException(
+        'Schedule olishda xatolik yuz berdi',
+      );
     }
   }
 
+  // 🟢 DELETE — jadvaldan ovqatni o‘chirish
   async removeFromSchedule(id: number) {
     try {
       return await this.prisma.schedule.delete({
@@ -164,7 +174,9 @@ export class AdminService {
       });
     } catch (error) {
       console.error("❌ Schedule o'chirishda xatolik:", error);
-      throw new Error("Schedule o'chirishda xatolik yuz berdi");
+      throw new InternalServerErrorException(
+        "Schedule o'chirishda xatolik yuz berdi",
+      );
     }
   }
 }

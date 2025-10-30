@@ -1,10 +1,21 @@
-import { IsNumber, IsOptional } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+
+export enum FoodCategory {
+  FIRST = 'FIRST',
+  SECOND = 'SECOND',
+  SALAD = 'SALAD',
+}
 
 export class ScheduleDto {
   @IsOptional()
-  date: string;  // YYYY-MM-DD
+  @IsString()
+  date: string; // YYYY-MM-DD
 
   @IsOptional()
   @IsNumber()
-  foodId: number; 
+  foodId: number;
+
+  @IsOptional()
+  @IsEnum(FoodCategory)
+  category: FoodCategory; // 👈 yangi maydon
 }
