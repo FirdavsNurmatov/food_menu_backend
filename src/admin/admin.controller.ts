@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -50,8 +51,8 @@ export class AdminController {
   }
 
   @Get()
-  findAll() {
-    return this.adminService.findAll();
+  findAll(@Query('category') category: string) {
+    return this.adminService.findAll(category);
   }
 
   @Get(':id')
@@ -101,11 +102,11 @@ export class AdminController {
   }
 
   // ---------- Schedule endpoints ----------
-@Post('schedule')
-addToSchedule(@Body() dto: ScheduleDto) {
-  // dto: { date: string, foodId: number, category: 'FIRST' | 'SECOND' | 'SALAD' }
-  return this.adminService.addToSchedule(dto);
-}
+  @Post('schedule')
+  addToSchedule(@Body() dto: ScheduleDto) {
+    // dto: { date: string, foodId: number, category: 'FOOD' | 'DRINK' }
+    return this.adminService.addToSchedule(dto);
+  }
 
   @Get('schedule/:date')
   getScheduleByDate(@Param('date') date: string) {

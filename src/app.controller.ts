@@ -9,4 +9,9 @@ export class AppController {
   getFoods(@Param('date') date: string) {
     return this.appService.getFoods(date);
   }
+
+  @Get('drinks')
+  getDrinks() {
+    return this.appService.getDrinks();
+  }
 }

@@ -14,12 +14,13 @@ generator client {
 }
 
 model Food {
-  id          Int     @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
   image       String?
   price       Float
   description String?
-  is_active   Boolean @default(true) // yangi maydon
+  is_active   Boolean      @default(true) // yangi maydon
+  category    FoodCategory @default(FOOD)
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -27,16 +28,14 @@ model Food {
 }
 
 enum FoodCategory {
-  FIRST // 1-taom
-  SECOND // 2-taom
-  SALAD // salat
+  FOOD
+  DRINK
 }
 
 model Schedule {
-  id       Int          @id @default(autoincrement())
-  date     DateTime
-  foodId   Int
-  category FoodCategory @default(FIRST)
+  id     Int      @id @default(autoincrement())
+  date   DateTime
+  foodId Int
 
   food Food @relation(fields: [foodId], references: [id], onDelete: Cascade)
 

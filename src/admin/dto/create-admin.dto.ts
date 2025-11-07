@@ -1,5 +1,10 @@
 import { Type } from 'class-transformer';
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
+
+export enum FoodCategory {
+  FOOD = 'FOOD',
+  DRINK = 'DRINK',
+}
 
 export class CreateAdminDto {
   @IsString()
@@ -15,4 +20,8 @@ export class CreateAdminDto {
   @IsOptional()
   @IsString()
   image?: string;
+
+  @IsOptional()
+  @IsEnum(FoodCategory)
+  category: FoodCategory; // 👈 yangi maydon
 }

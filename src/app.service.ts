@@ -19,4 +19,18 @@ export class AppService {
       );
     }
   }
+
+  async getDrinks() {
+    try {
+      return await this.prisma.food.findMany({
+        where: {
+          category: 'DRINK',
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Ichimliklar ro‘yxatini olishda xatolik',
+      );
+    }
+  }
 }

@@ -4,12 +4,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateAdminDto } from './dto/create-admin.dto';
+import { CreateAdminDto, FoodCategory } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ScheduleDto } from './dto/schedule.dto';
-import { FoodCategory } from './dto/schedule.dto';
 
 @Injectable()
 export class AdminService {
@@ -28,6 +27,7 @@ export class AdminService {
           description: createAdminDto.description,
           price: createAdminDto.price,
           image: createAdminDto.image,
+          category: createAdminDto.category,
         },
       });
     } catch (error) {
@@ -39,10 +39,13 @@ export class AdminService {
   }
 
   // READ — barcha taomlarni olish
-  async findAll() {
+  async findAll(category: string) {
     try {
+      if (!category) {
+        return await this.prisma.food.findMany({});
+      }
       return await this.prisma.food.findMany({
-        orderBy: { createdAt: 'desc' },
+        where: { category: 'FOOD' },
       });
     } catch (error) {
       console.error('❌ FindAll error:', error);
@@ -127,17 +130,12 @@ export class AdminService {
   // 🟢 ADD TO SCHEDULE — jadvalga ovqat qo‘shish
   async addToSchedule(dto: ScheduleDto) {
     try {
-      const { date, foodId, category } = dto;
-
-      if (!category) {
-        throw new InternalServerErrorException('category maydoni kiritilmagan');
-      }
+      const { date, foodId } = dto;
 
       return await this.prisma.schedule.create({
         data: {
           date: new Date(date),
           foodId,
-          category: category as FoodCategory, // 👈 enum sifatida saqlanadi
         },
       });
     } catch (error) {
@@ -156,7 +154,6 @@ export class AdminService {
           date: new Date(date),
         },
         include: { food: true },
-        orderBy: { category: 'asc' }, // 👈 1-taom, 2-taom, salat tartibida chiqarish uchun
       });
     } catch (error) {
       console.error('❌ Schedule olishda xatolik:', error);
