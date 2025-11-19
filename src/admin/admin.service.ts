@@ -78,18 +78,36 @@ export class AdminService {
 
       const dataToUpdate: any = {};
 
+      // Agar image yangilanayotgan bo‘lsa → eski faylni o‘chiramiz
+      if (updateAdminDto.image !== undefined) {
+        if (existingFood.image) {
+          const imagePath = path.join(
+            process.cwd(),
+            'uploads',
+            'foods',
+            existingFood.image,
+          );
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        }
+
+        dataToUpdate.image = updateAdminDto.image;
+      }
+
       if (updateAdminDto.name !== undefined)
         dataToUpdate.name = updateAdminDto.name;
+
       if (updateAdminDto.price !== undefined)
         dataToUpdate.price = updateAdminDto.price;
+
       if (updateAdminDto.description !== undefined)
         dataToUpdate.description = updateAdminDto.description;
+
       if (updateAdminDto.is_active !== undefined)
         dataToUpdate.is_active =
           updateAdminDto.is_active === 'true' ||
           updateAdminDto.is_active === true;
-      if (updateAdminDto.image !== undefined)
-        dataToUpdate.image = updateAdminDto.image;
 
       return await this.prisma.food.update({
         where: { id },
